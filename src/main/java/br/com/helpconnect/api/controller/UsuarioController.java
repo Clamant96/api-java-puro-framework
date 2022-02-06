@@ -4,11 +4,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import br.com.helpconnect.api.DB.ConnectionDB;
 import br.com.helpconnect.api.model.Produto;
 import br.com.helpconnect.api.model.Usuario;
+import br.com.helpconnect.api.model.UsuarioLogin;
+import br.com.helpconnect.api.service.UsuarioService;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -21,17 +24,29 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-@Path("usuarios")
+@Path("/usuarios")
 public class UsuarioController {
+	
+	/*@GET
+	@Path("/autorizacao/{token}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public static Usuario testeAutorizacao(@PathParam("token") String token) {
+		return UsuarioService.autorizaAcessoEndpoint(token);
+	}*/
 	
 	/* GET ALL - TRAZ TODOS OS DADOS CADASTRADOS NA BASE DE DADOS */
 	@GET
+	@Path("/token/{token}")
     @Produces(MediaType.APPLICATION_JSON)
-	public static List<Usuario> getAllUsuarios() {
+	public static List<Usuario> getAllUsuarios(@PathParam("token") String token) {
 		
 		List<Usuario> listaUsuarios = new ArrayList<Usuario>();
 		
 		try {
+			
+			if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
+				return null;
+			}
 			
 			Connection connection = ConnectionDB.getConnection();
 			PreparedStatement prepare = connection.prepareStatement("SELECT * FROM usuario");
@@ -81,13 +96,17 @@ public class UsuarioController {
 	
 	/* GET BY ID - TRAZ UM DADO DE ACORDO COM O ID PASSADO */
 	@GET
-    @Path("/{id}")
+    @Path("/{id}/token/{token}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Usuario getByUsuarioId(@PathParam("id") int id) {
+    public Usuario getByUsuarioId(@PathParam("id") int id, @PathParam("token") String token) {
 		
 		Usuario usuario = null;
 		
 		try {
+			
+			if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
+				return null;
+			}
 			
 			Connection connection = ConnectionDB.getConnection();
 			PreparedStatement prepare = connection.prepareStatement("SELECT * FROM usuario WHERE id = ?");
@@ -136,11 +155,15 @@ public class UsuarioController {
 	
 	/* GET COMPRAR - ADICIONA UM PRODUTO AO USUARIO */
 	@GET
-    @Path("/comprar/id_produto/{idProduto}/id_usuario/{idUsuario}")
+    @Path("/comprar/id_produto/{idProduto}/id_usuario/{idUsuario}/token/{token}")
     @Produces(MediaType.APPLICATION_JSON)
-    public static Response comprarProduto(@PathParam("idUsuario") int idUsuario, @PathParam("idProduto") int idProduto) {
+    public static Response comprarProduto(@PathParam("idUsuario") int idUsuario, @PathParam("idProduto") int idProduto, @PathParam("token") String token) {
 		
 		try {
+			
+			if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
+				return null;
+			}
 			
 			/* VERIFICA SE O ITEM JA ESTA INCLUSO NA LISTA DO USUARIO CASO ESTEJA O MESMO E REMOVIDO DA LISTA */
 			try {
@@ -193,18 +216,21 @@ public class UsuarioController {
 	
 	/* POST - CADASTRA UM NOVO DADO NA BASE DE DADOS */
 	@POST
+	@Path("/cadastro")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
 	public static Response postUsuario(Usuario usuario) {
 		
 		try {
 			
+			if(UsuarioService.verificaSeExisteUsuarioNoBanco(usuario) == null) {
+				return null;
+			}
+			
 			Connection connection = ConnectionDB.getConnection();
 			PreparedStatement prepare = connection.prepareStatement("INSERT INTO usuario (username, senha) VALUES (?, ?)");
 			prepare.setString(1, usuario.getUsername());
 			prepare.setString(2, usuario.getSenha());
-			
-			System.out.println(prepare);
 			
 			prepare.executeUpdate();
 			
@@ -217,8 +243,50 @@ public class UsuarioController {
 		
 	}
 	
+	/* POST - LOGA UM NOVO USUARIO NO SISTEMA, GERANDO UM TOKEN DE AUTENTICACAO */
+	@POST
+	@Path("/login")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+	public static UsuarioLogin postLoginUsuario(UsuarioLogin usuarioLogin) {
+		
+		try {
+			
+			Connection connection = ConnectionDB.getConnection();
+			PreparedStatement prepare = connection.prepareStatement("SELECT * FROM usuario WHERE username = ? AND senha = ?");
+			prepare.setString(1, usuarioLogin.getUsername());
+			prepare.setString(2, usuarioLogin.getSenha());
+			
+			ResultSet resultSet = prepare.executeQuery();
+			
+			while(resultSet.next()) {
+				
+				usuarioLogin.setId(resultSet.getInt("id"));
+				usuarioLogin.setUsername(resultSet.getString("username"));
+				usuarioLogin.setSenha(resultSet.getString("senha"));
+				
+				String token = usuarioLogin.getUsername() +":"+ usuarioLogin.getSenha();
+				
+				usuarioLogin.setToken(new String(Base64.getEncoder().encode(token.getBytes()))); // CRIPTOGRAFA OS DADOS DO LOGIN DE USUARIO E INSERE DE DO TOKEN DO OBJETO DE USUARIO LOGIN
+				
+			}
+			
+			/* CASO NAO TENHA SIDO LOCALIZADO O LOGIN NA BASE DE DADOS, RETORNA UM ERRO AO USUARIO */
+			if(usuarioLogin.getId() == 0) {
+				return null;
+			}
+			
+		}catch(Exception erro) {
+			erro.printStackTrace();
+			
+		}
+		
+		return usuarioLogin;
+	}
+	
 	/* PUT - ATUALIZA UM DADO NA BASE DE DADOS, PARA ISSO USANDO COMO REFERENCIA O ID ENVIADO NO BODY */
 	@PUT
+	@Path("/atualizar")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
 	public static Response putUsuario(Usuario usuario) {
@@ -226,7 +294,7 @@ public class UsuarioController {
 		try {
 			
 			if(usuario.getId() == 0) {
-				return Response.notModified().build();
+				return null;
 			}
 			
 			Connection connection = ConnectionDB.getConnection();
@@ -249,11 +317,15 @@ public class UsuarioController {
 	
 	/* DELETE - DELETA UM DETERMINADO DADO DE ACORDO COMO O ID INFORMADO */
 	@DELETE
-    @Path("/{id}")
+    @Path("/{id}/token/{token}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deletePessoa(@PathParam("id") int id) {
+    public Response deletePessoa(@PathParam("id") int id, @PathParam("token") String token) {
         
         try {
+        	
+        	if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
+				return null;
+			}
 			
 			Connection connection = ConnectionDB.getConnection();
 			PreparedStatement prepare = connection.prepareStatement("DELETE FROM usuario WHERE id = ?");

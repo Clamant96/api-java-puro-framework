@@ -22,7 +22,7 @@ import jakarta.ws.rs.core.Response;
 /**
  * Root resource (exposed at "myresource" path)
  */
-@Path("teste-endpoints")
+@Path("/teste-endpoints")
 public class MyResource {
 	
 	@GET
