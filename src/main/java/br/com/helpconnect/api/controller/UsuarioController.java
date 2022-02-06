@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.helpconnect.api.DB.ConnectionDB;
+import br.com.helpconnect.api.model.Produto;
 import br.com.helpconnect.api.model.Usuario;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -38,11 +39,33 @@ public class UsuarioController {
 			ResultSet resultSet = prepare.executeQuery();
 			
 			while(resultSet.next()) {
+				
 				Usuario usuario = new Usuario();
+				
+				List<Produto> listaProdutos = new ArrayList<Produto>(); // INSTANCIA UMA LISTA DE PRODUTOS, PARA INSERIR ESSE PRODUTOS NO ARRAY DE PRODUTO DO USUARIO
+				
+				/* RETORNA UM OBJETO PRODUTO */
+				PreparedStatement prepareTableAssociativa = connection.prepareStatement("SELECT p.id, p.titulo, p.descricao FROM usuario AS u INNER JOIN usuario_produto AS up INNER JOIN produto AS p ON u.id = up.id_usuario AND up.id_produto = p.id WHERE u.id = ?");
+				prepareTableAssociativa.setInt(1, resultSet.getInt("id"));
+				
+				ResultSet resultSetTableAssociativa = prepareTableAssociativa.executeQuery();
+				
+				while(resultSetTableAssociativa.next()) {
+					
+					Produto produto = new Produto();
+					
+					produto.setId(resultSetTableAssociativa.getInt("id"));
+					produto.setTitulo(resultSetTableAssociativa.getString("titulo"));
+					produto.setDescricao(resultSetTableAssociativa.getString("descricao"));
+					
+					listaProdutos.add(produto);
+					
+				}
 				
 				usuario.setId(resultSet.getInt("id"));
 				usuario.setUsername(resultSet.getString("username"));
 				usuario.setSenha(resultSet.getString("senha"));
+				usuario.setProdutos(listaProdutos); // INSERE A LISTA DE PRODUTOS RECUPERADOS DO BANCO NO ARRAY DO USUARIO
 				
 				listaUsuarios.add(usuario);
 				
@@ -74,11 +97,32 @@ public class UsuarioController {
 			
 			while(resultSet.next()) {
 				
+				List<Produto> listaProdutos = new ArrayList<Produto>(); // INSTANCIA UMA LISTA DE PRODUTOS, PARA INSERIR ESSE PRODUTOS NO ARRAY DE PRODUTO DO USUARIO
+				
+				/* RETORNA UM OBJETO PRODUTO */
+				PreparedStatement prepareTableAssociativa = connection.prepareStatement("SELECT p.id, p.titulo, p.descricao FROM usuario AS u INNER JOIN usuario_produto AS up INNER JOIN produto AS p ON u.id = up.id_usuario AND up.id_produto = p.id WHERE u.id = ?");
+				prepareTableAssociativa.setInt(1, resultSet.getInt("id"));
+				
+				ResultSet resultSetTableAssociativa = prepareTableAssociativa.executeQuery();
+				
+				while(resultSetTableAssociativa.next()) {
+					
+					Produto produto = new Produto();
+					
+					produto.setId(resultSetTableAssociativa.getInt("id"));
+					produto.setTitulo(resultSetTableAssociativa.getString("titulo"));
+					produto.setDescricao(resultSetTableAssociativa.getString("descricao"));
+					
+					listaProdutos.add(produto);
+					
+				}
+				
 				usuario = new Usuario();
 				
 				usuario.setId(resultSet.getInt("id"));
 				usuario.setUsername(resultSet.getString("username"));
 				usuario.setSenha(resultSet.getString("senha"));
+				usuario.setProdutos(listaProdutos); // INSERE A LISTA DE PRODUTOS RECUPERADOS DO BANCO NO ARRAY DO USUARIO
 				
 			}
 			
@@ -92,7 +136,7 @@ public class UsuarioController {
 	
 	/* GET COMPRAR - ADICIONA UM PRODUTO AO USUARIO */
 	@GET
-    @Path("/comprar/{idProduto}/{idUsuario}")
+    @Path("/comprar/id_produto/{idProduto}/id_usuario/{idUsuario}")
     @Produces(MediaType.APPLICATION_JSON)
     public static Response comprarProduto(@PathParam("idUsuario") int idUsuario, @PathParam("idProduto") int idProduto) {
 		

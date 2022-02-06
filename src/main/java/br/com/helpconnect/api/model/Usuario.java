@@ -1,5 +1,8 @@
 package br.com.helpconnect.api.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Usuario {
 	
 	private int id;
@@ -7,6 +10,8 @@ public class Usuario {
     private String username;
     
     private String senha;
+    
+    private List<Produto> produtos = new ArrayList<>();
 
 	public int getId() {
 		return id;
@@ -30,6 +35,14 @@ public class Usuario {
 
 	public void setSenha(String senha) {
 		this.senha = senha;
+	}
+
+	public List<Produto> getProdutos() {
+		return produtos;
+	}
+
+	public void setProdutos(List<Produto> produtos) {
+		this.produtos = produtos;
 	}
     
 }
