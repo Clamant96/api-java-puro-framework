@@ -18,6 +18,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 @Path("pessoas")
 public class PessoaController {
@@ -116,7 +117,7 @@ public class PessoaController {
 			
 			prepare.executeUpdate();
 			
-			return Response.ok().build();
+			return Response.status(Status.CREATED).build();
 			
 		}catch(Exception erro) {
 			return Response.notModified().build();
@@ -150,7 +151,7 @@ public class PessoaController {
 			
 			prepare.executeUpdate();
 			
-			return Response.ok().build();
+			return Response.status(Status.ACCEPTED).build();
 		
 		}catch(Exception erro) {
 			return Response.notModified().build();

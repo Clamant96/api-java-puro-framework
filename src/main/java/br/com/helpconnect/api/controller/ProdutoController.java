@@ -8,7 +8,6 @@ import java.util.List;
 
 import br.com.helpconnect.api.DB.ConnectionDB;
 import br.com.helpconnect.api.model.Produto;
-import br.com.helpconnect.api.model.Usuario;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -19,6 +18,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 @Path("produtos")
 public class ProdutoController {
@@ -105,7 +105,7 @@ public class ProdutoController {
 			
 			prepare.executeUpdate();
 			
-			return Response.ok().build();
+			return Response.status(Status.CREATED).build();
 			
 		}catch(Exception erro) {
 			return Response.notModified().build();
@@ -135,7 +135,7 @@ public class ProdutoController {
 			
 			prepare.executeUpdate();
 			
-			return Response.ok().build();
+			return Response.status(Status.ACCEPTED).build();
 		
 		}catch(Exception erro) {
 			return Response.notModified().build();

@@ -18,6 +18,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 @Path("usuarios")
 public class UsuarioController {
@@ -89,6 +90,63 @@ public class UsuarioController {
 		return usuario;
 	}
 	
+	/* GET COMPRAR - ADICIONA UM PRODUTO AO USUARIO */
+	@GET
+    @Path("/comprar/{idProduto}/{idUsuario}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public static Response comprarProduto(@PathParam("idUsuario") int idUsuario, @PathParam("idProduto") int idProduto) {
+		
+		try {
+			
+			/* VERIFICA SE O ITEM JA ESTA INCLUSO NA LISTA DO USUARIO CASO ESTEJA O MESMO E REMOVIDO DA LISTA */
+			try {
+				
+				Connection connection = ConnectionDB.getConnection();
+				PreparedStatement prepare = connection.prepareStatement("SELECT * FROM usuario_produto WHERE id_usuario = ? AND id_produto = ?");
+				prepare.setInt(1, idUsuario);
+				prepare.setInt(2, idProduto);
+				
+				ResultSet resultSet = prepare.executeQuery();
+				
+				int contador = 0;
+				
+				while(resultSet.next()) {	
+					contador++;
+					
+				}
+				
+				if(contador > 0) {
+					prepare = connection.prepareStatement("DELETE FROM usuario_produto WHERE id_usuario = ? AND id_produto = ?");
+					prepare.setInt(1, idUsuario);
+					prepare.setInt(2, idProduto);
+					
+					prepare.executeUpdate();
+					
+					return Response.status(Status.OK).build();
+				}
+				
+			}catch(Exception erro) {
+				erro.printStackTrace();
+				
+			}
+			
+			/* INSERE UM NOVO NA TABELA ASSOCIATIVA, MAS PARA ISSO O DADO NAO PODE EXISTIR NESSA TABELA */
+			Connection connection = ConnectionDB.getConnection();
+			PreparedStatement prepare = connection.prepareStatement("INSERT INTO usuario_produto (id_usuario, id_produto) VALUES (?, ?)");
+			prepare.setInt(1, idUsuario);
+			prepare.setInt(2, idProduto);
+			
+			prepare.executeUpdate();
+			
+			return Response.status(Status.CREATED).build();
+			
+		}catch(Exception erro) {
+			return Response.notModified().build();
+			
+		}
+
+	}
+	
 	/* POST - CADASTRA UM NOVO DADO NA BASE DE DADOS */
 	@POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -101,6 +159,8 @@ public class UsuarioController {
 			PreparedStatement prepare = connection.prepareStatement("INSERT INTO usuario (username, senha) VALUES (?, ?)");
 			prepare.setString(1, usuario.getUsername());
 			prepare.setString(2, usuario.getSenha());
+			
+			System.out.println(prepare);
 			
 			prepare.executeUpdate();
 			
