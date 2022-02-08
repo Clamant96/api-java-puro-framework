@@ -8,6 +8,7 @@ import java.util.List;
 
 import br.com.helpconnect.api.DB.ConnectionDB;
 import br.com.helpconnect.api.model.Produto;
+import br.com.helpconnect.api.model.Usuario;
 import br.com.helpconnect.api.service.ProdutoService;
 import br.com.helpconnect.api.service.UsuarioService;
 import jakarta.ws.rs.Consumes;
@@ -47,9 +48,30 @@ public class ProdutoController {
 			while(resultSet.next()) {
 				Produto produto = new Produto();
 				
+				List<Usuario> listaUsuario = new ArrayList<Usuario>(); // INSTANCIA UMA LISTA DE USUARIO, PARA INSERIR ESSE USUARIOS NO ARRAY DE PRODUTO
+				
+				/* RETORNA UM OBJETO USUARIO */
+				PreparedStatement prepareTableAssociativa = connection.prepareStatement("SELECT u.id, u.username, u.senha FROM usuario AS u INNER JOIN usuario_produto AS up INNER JOIN produto AS p ON u.id = up.id_usuario AND up.id_produto = p.id WHERE p.id = ?");
+				prepareTableAssociativa.setInt(1, resultSet.getInt("id"));
+				
+				ResultSet resultSetTableAssociativa = prepareTableAssociativa.executeQuery();
+				
+				while(resultSetTableAssociativa.next()) {
+					
+					Usuario usuario = new Usuario();
+					
+					usuario.setId(resultSetTableAssociativa.getInt("id"));
+					usuario.setUsername(resultSetTableAssociativa.getString("username"));
+					usuario.setSenha(resultSetTableAssociativa.getString("senha"));
+					
+					listaUsuario.add(usuario);
+					
+				}
+				
 				produto.setId(resultSet.getInt("id"));
 				produto.setTitulo(resultSet.getString("titulo"));
 				produto.setDescricao(resultSet.getString("descricao"));
+				produto.setUsuarios(listaUsuario);
 				
 				listaProdutos.add(produto);
 				
@@ -87,9 +109,30 @@ public class ProdutoController {
 				
 				produto = new Produto();
 				
+				List<Usuario> listaUsuario = new ArrayList<Usuario>(); // INSTANCIA UMA LISTA DE USUARIO, PARA INSERIR ESSE USUARIOS NO ARRAY DE PRODUTO
+				
+				/* RETORNA UM OBJETO USUARIO */
+				PreparedStatement prepareTableAssociativa = connection.prepareStatement("SELECT u.id, u.username, u.senha FROM usuario AS u INNER JOIN usuario_produto AS up INNER JOIN produto AS p ON u.id = up.id_usuario AND up.id_produto = p.id WHERE p.id = ?");
+				prepareTableAssociativa.setInt(1, resultSet.getInt("id"));
+				
+				ResultSet resultSetTableAssociativa = prepareTableAssociativa.executeQuery();
+				
+				while(resultSetTableAssociativa.next()) {
+					
+					Usuario usuario = new Usuario();
+					
+					usuario.setId(resultSetTableAssociativa.getInt("id"));
+					usuario.setUsername(resultSetTableAssociativa.getString("username"));
+					usuario.setSenha(resultSetTableAssociativa.getString("senha"));
+					
+					listaUsuario.add(usuario);
+					
+				}
+				
 				produto.setId(resultSet.getInt("id"));
 				produto.setTitulo(resultSet.getString("titulo"));
 				produto.setDescricao(resultSet.getString("descricao"));
+				produto.setUsuarios(listaUsuario);
 				
 			}
 			
