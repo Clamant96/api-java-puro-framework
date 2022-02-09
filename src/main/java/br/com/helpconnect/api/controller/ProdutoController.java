@@ -71,6 +71,7 @@ public class ProdutoController {
 				produto.setId(resultSet.getInt("id"));
 				produto.setTitulo(resultSet.getString("titulo"));
 				produto.setDescricao(resultSet.getString("descricao"));
+				produto.setEstoque(resultSet.getString("estoque"));
 				produto.setUsuarios(listaUsuario);
 				
 				listaProdutos.add(produto);
@@ -132,6 +133,7 @@ public class ProdutoController {
 				produto.setId(resultSet.getInt("id"));
 				produto.setTitulo(resultSet.getString("titulo"));
 				produto.setDescricao(resultSet.getString("descricao"));
+				produto.setEstoque(resultSet.getString("estoque"));
 				produto.setUsuarios(listaUsuario);
 				
 			}
@@ -162,9 +164,10 @@ public class ProdutoController {
 			}
 			
 			Connection connection = ConnectionDB.getConnection();
-			PreparedStatement prepare = connection.prepareStatement("INSERT INTO produto (titulo, descricao) VALUES (?, ?)");
+			PreparedStatement prepare = connection.prepareStatement("INSERT INTO produto (titulo, descricao, estoque) VALUES (?, ?, ?)");
 			prepare.setString(1, produto.getTitulo());
 			prepare.setString(2, produto.getDescricao());
+			prepare.setString(3, produto.getEstoque());
 			
 			prepare.executeUpdate();
 			
@@ -195,11 +198,12 @@ public class ProdutoController {
 			}
 			
 			Connection connection = ConnectionDB.getConnection();
-			PreparedStatement prepare = connection.prepareStatement("UPDATE produto SET titulo = ?, descricao = ? WHERE id = ?");
+			PreparedStatement prepare = connection.prepareStatement("UPDATE produto SET titulo = ?, descricao = ?, estoque = ? WHERE id = ?");
 			prepare.setString(1, produto.getTitulo());
 			prepare.setString(2, produto.getDescricao());
+			prepare.setString(3, produto.getEstoque());
 			
-			prepare.setInt(3, produto.getId());
+			prepare.setInt(4, produto.getId());
 			
 			prepare.executeUpdate();
 			

@@ -11,6 +11,7 @@ import br.com.helpconnect.api.DB.ConnectionDB;
 import br.com.helpconnect.api.model.Produto;
 import br.com.helpconnect.api.model.Usuario;
 import br.com.helpconnect.api.model.UsuarioLogin;
+import br.com.helpconnect.api.service.ProdutoService;
 import br.com.helpconnect.api.service.UsuarioService;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -60,7 +61,7 @@ public class UsuarioController {
 				List<Produto> listaProdutos = new ArrayList<Produto>(); // INSTANCIA UMA LISTA DE PRODUTOS, PARA INSERIR ESSE PRODUTOS NO ARRAY DE PRODUTO DO USUARIO
 				
 				/* RETORNA UM OBJETO PRODUTO */
-				PreparedStatement prepareTableAssociativa = connection.prepareStatement("SELECT p.id, p.titulo, p.descricao FROM usuario AS u INNER JOIN usuario_produto AS up INNER JOIN produto AS p ON u.id = up.id_usuario AND up.id_produto = p.id WHERE u.id = ?");
+				PreparedStatement prepareTableAssociativa = connection.prepareStatement("SELECT p.id, p.titulo, p.descricao, p.estoque FROM usuario AS u INNER JOIN usuario_produto AS up INNER JOIN produto AS p ON u.id = up.id_usuario AND up.id_produto = p.id WHERE u.id = ?");
 				prepareTableAssociativa.setInt(1, resultSet.getInt("id"));
 				
 				ResultSet resultSetTableAssociativa = prepareTableAssociativa.executeQuery();
@@ -72,6 +73,7 @@ public class UsuarioController {
 					produto.setId(resultSetTableAssociativa.getInt("id"));
 					produto.setTitulo(resultSetTableAssociativa.getString("titulo"));
 					produto.setDescricao(resultSetTableAssociativa.getString("descricao"));
+					produto.setEstoque(resultSetTableAssociativa.getString("estoque"));
 					
 					listaProdutos.add(produto);
 					
@@ -119,7 +121,7 @@ public class UsuarioController {
 				List<Produto> listaProdutos = new ArrayList<Produto>(); // INSTANCIA UMA LISTA DE PRODUTOS, PARA INSERIR ESSE PRODUTOS NO ARRAY DE PRODUTO DO USUARIO
 				
 				/* RETORNA UM OBJETO PRODUTO */
-				PreparedStatement prepareTableAssociativa = connection.prepareStatement("SELECT p.id, p.titulo, p.descricao FROM usuario AS u INNER JOIN usuario_produto AS up INNER JOIN produto AS p ON u.id = up.id_usuario AND up.id_produto = p.id WHERE u.id = ?");
+				PreparedStatement prepareTableAssociativa = connection.prepareStatement("SELECT p.id, p.titulo, p.descricao, p.estoque FROM usuario AS u INNER JOIN usuario_produto AS up INNER JOIN produto AS p ON u.id = up.id_usuario AND up.id_produto = p.id WHERE u.id = ?");
 				prepareTableAssociativa.setInt(1, resultSet.getInt("id"));
 				
 				ResultSet resultSetTableAssociativa = prepareTableAssociativa.executeQuery();
@@ -131,6 +133,7 @@ public class UsuarioController {
 					produto.setId(resultSetTableAssociativa.getInt("id"));
 					produto.setTitulo(resultSetTableAssociativa.getString("titulo"));
 					produto.setDescricao(resultSetTableAssociativa.getString("descricao"));
+					produto.setEstoque(resultSetTableAssociativa.getString("estoque"));
 					
 					listaProdutos.add(produto);
 					
@@ -159,17 +162,45 @@ public class UsuarioController {
     @Produces(MediaType.APPLICATION_JSON)
     public static Response comprarProduto(@PathParam("idUsuario") int idUsuario, @PathParam("idProduto") int idProduto, @PathParam("token") String token) {
 		
+		boolean disponibilidade = false;
+		
 		try {
 			
 			if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
 				return null;
 			}
 			
+			Connection connection = ConnectionDB.getConnection();
+			PreparedStatement prepare = null;
+			
+			/* VERIFICA SE EXISTE ITENS DISPONIVEIS NO ESTOQUE DO PRODUTO SELECIONADO */
+			prepare = connection.prepareStatement("SELECT * FROM produto WHERE id = ?");
+			prepare.setInt(1, idProduto);
+			
+			ResultSet resultSetQtdItensEstoque = prepare.executeQuery();
+			
+			Produto produto = null;
+			
+			while(resultSetQtdItensEstoque.next()) {
+				
+				produto = new Produto();
+				
+				produto.setId(resultSetQtdItensEstoque.getInt("id"));
+				produto.setTitulo(resultSetQtdItensEstoque.getString("titulo"));
+				produto.setDescricao(resultSetQtdItensEstoque.getString("descricao"));
+				produto.setEstoque(resultSetQtdItensEstoque.getString("estoque"));
+				
+				if(Integer.parseInt(produto.getEstoque()) > 0) {
+					disponibilidade = true;
+				}
+
+				
+			}
+			
 			/* VERIFICA SE O ITEM JA ESTA INCLUSO NA LISTA DO USUARIO CASO ESTEJA O MESMO E REMOVIDO DA LISTA */
 			try {
 				
-				Connection connection = ConnectionDB.getConnection();
-				PreparedStatement prepare = connection.prepareStatement("SELECT * FROM usuario_produto WHERE id_usuario = ? AND id_produto = ?");
+				prepare = connection.prepareStatement("SELECT * FROM usuario_produto WHERE id_usuario = ? AND id_produto = ?");
 				prepare.setInt(1, idUsuario);
 				prepare.setInt(2, idProduto);
 				
@@ -189,6 +220,8 @@ public class UsuarioController {
 					
 					prepare.executeUpdate();
 					
+					ProdutoService.ajustaEstoqueAdicionandoProdutoRetornadoAoEstoque(produto, connection, prepare);
+					
 					return Response.status(Status.OK).build();
 				}
 				
@@ -196,16 +229,23 @@ public class UsuarioController {
 				erro.printStackTrace();
 				
 			}
-			
+					
 			/* INSERE UM NOVO NA TABELA ASSOCIATIVA, MAS PARA ISSO O DADO NAO PODE EXISTIR NESSA TABELA */
-			Connection connection = ConnectionDB.getConnection();
-			PreparedStatement prepare = connection.prepareStatement("INSERT INTO usuario_produto (id_usuario, id_produto) VALUES (?, ?)");
-			prepare.setInt(1, idUsuario);
-			prepare.setInt(2, idProduto);
-			
-			prepare.executeUpdate();
-			
-			return Response.status(Status.CREATED).build();
+			if(disponibilidade) {
+				/* AJUSTA O VALOR DO ESTOQUE RETIRANDO UMA UNIDADE DO ESTOQUE */
+				ProdutoService.ajustaEstoqueRetiraProdutoDoEstoque(produto, connection, prepare);
+				
+				prepare = connection.prepareStatement("INSERT INTO usuario_produto (id_usuario, id_produto) VALUES (?, ?)");
+				prepare.setInt(1, idUsuario);
+				prepare.setInt(2, idProduto);
+				
+				prepare.executeUpdate();
+				
+				return Response.status(Status.CREATED).build();
+			}else {
+				
+				return Response.status(Status.NOT_MODIFIED).build();
+			}
 			
 		}catch(Exception erro) {
 			return Response.notModified().build();

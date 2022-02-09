@@ -12,6 +12,8 @@ public class Produto {
     private String descricao;
     
     private List<Usuario> usuarios = new ArrayList<Usuario>();
+    
+    private String estoque;
 
 	public int getId() {
 		return id;
@@ -44,5 +46,13 @@ public class Produto {
 	public void setUsuarios(List<Usuario> usuarios) {
 		this.usuarios = usuarios;
 	}
-    
+
+	public String getEstoque() {
+		return estoque;
+	}
+
+	public void setEstoque(String estoque) {
+		this.estoque = estoque;
+	}
+	
 }
