@@ -27,14 +27,7 @@ import jakarta.ws.rs.core.Response.Status;
 
 @Path("/usuarios")
 public class UsuarioController {
-	
-	/*@GET
-	@Path("/autorizacao/{token}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public static Usuario testeAutorizacao(@PathParam("token") String token) {
-		return UsuarioService.autorizaAcessoEndpoint(token);
-	}*/
-	
+
 	/* GET ALL - TRAZ TODOS OS DADOS CADASTRADOS NA BASE DE DADOS */
 	@GET
 	@Path("/token/{token}")
@@ -82,7 +75,7 @@ public class UsuarioController {
 				usuario.setId(resultSet.getInt("id"));
 				usuario.setUsername(resultSet.getString("username"));
 				usuario.setSenha(resultSet.getString("senha"));
-				usuario.setProdutos(listaProdutos); // INSERE A LISTA DE PRODUTOS RECUPERADOS DO BANCO NO ARRAY DO USUARIO
+				usuario.setProdutos(UsuarioService.carregaListaDeProdutoPorIdDeUsuario(connection, usuario.getId())); // INSERE A LISTA DE PRODUTOS RECUPERADOS DO BANCO NO ARRAY DO USUARIO
 				
 				listaUsuarios.add(usuario);
 				
@@ -144,7 +137,7 @@ public class UsuarioController {
 				usuario.setId(resultSet.getInt("id"));
 				usuario.setUsername(resultSet.getString("username"));
 				usuario.setSenha(resultSet.getString("senha"));
-				usuario.setProdutos(listaProdutos); // INSERE A LISTA DE PRODUTOS RECUPERADOS DO BANCO NO ARRAY DO USUARIO
+				usuario.setProdutos(UsuarioService.carregaListaDeProdutoPorIdDeUsuario(connection, usuario.getId())); // INSERE A LISTA DE PRODUTOS RECUPERADOS DO BANCO NO ARRAY DO USUARIO
 				
 			}
 			

@@ -3,9 +3,13 @@ package br.com.helpconnect.api.service;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 import br.com.helpconnect.api.DB.ConnectionDB;
+import br.com.helpconnect.api.model.Produto;
 import br.com.helpconnect.api.model.Usuario;
 
 public class UsuarioService {
@@ -80,5 +84,32 @@ public class UsuarioService {
 		
 		return "Nao existe esse usuario no banco de dados";
 	}
-
+	
+	public static List<Produto> carregaListaDeProdutoPorIdDeUsuario(Connection connection, int idUsuario) throws SQLException {
+		
+		List<Produto> listaProdutos = new ArrayList<Produto>();
+		
+		/* RETORNA UM OBJETO PRODUTO */
+		PreparedStatement prepareTableAssociativa = connection.prepareStatement("SELECT p.id, p.titulo, p.descricao, p.estoque FROM usuario AS u INNER JOIN usuario_produto AS up INNER JOIN produto AS p ON u.id = up.id_usuario AND up.id_produto = p.id WHERE u.id = ?");
+		prepareTableAssociativa.setInt(1, idUsuario);
+		
+		ResultSet resultSetTableAssociativa = prepareTableAssociativa.executeQuery();
+		
+		while(resultSetTableAssociativa.next()) {
+			
+			Produto produto = new Produto();
+			
+			produto.setId(resultSetTableAssociativa.getInt("id"));
+			produto.setTitulo(resultSetTableAssociativa.getString("titulo"));
+			produto.setDescricao(resultSetTableAssociativa.getString("descricao"));
+			produto.setEstoque(resultSetTableAssociativa.getString("estoque"));
+			produto.setImgs(ProdutoService.carregaListaDeImagensProdutoPorId(connection, produto.getId())); // CARREGA A LISTA DE IMAGENS DO PRODUTO
+			
+			listaProdutos.add(produto);
+			
+		}
+		
+		return listaProdutos;
+	}
+	
 }

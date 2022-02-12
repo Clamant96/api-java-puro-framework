@@ -14,7 +14,9 @@ public class Produto {
     private List<Usuario> usuarios = new ArrayList<Usuario>();
     
     private String estoque;
-
+    
+    private List<Img> imgs = new ArrayList<Img>();
+    
 	public int getId() {
 		return id;
 	}
@@ -53,6 +55,14 @@ public class Produto {
 
 	public void setEstoque(String estoque) {
 		this.estoque = estoque;
+	}
+
+	public List<Img> getImgs() {
+		return imgs;
+	}
+
+	public void setImgs(List<Img> imgs) {
+		this.imgs = imgs;
 	}
 	
 }

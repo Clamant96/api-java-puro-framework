@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.helpconnect.api.DB.ConnectionDB;
+import br.com.helpconnect.api.model.Img;
 import br.com.helpconnect.api.model.Produto;
-import br.com.helpconnect.api.service.ProdutoService;
 import br.com.helpconnect.api.service.UsuarioService;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -22,16 +22,16 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-@Path("/produtos")
-public class ProdutoController {
+@Path("/imgs")
+public class ImgController {
 	
 	/* GET ALL - TRAZ TODOS OS DADOS CADASTRADOS NA BASE DE DADOS */
 	@GET
 	@Path("/token/{token}")
     @Produces(MediaType.APPLICATION_JSON)
-	public static List<Produto> getAllProdutos(@PathParam("token") String token) {
+	public static List<Img> getAllImgs(@PathParam("token") String token) {
 		
-		List<Produto> listaProdutos = new ArrayList<Produto>();
+		List<Img> listaImgs= new ArrayList<Img>();
 		
 		try {
 			
@@ -40,21 +40,27 @@ public class ProdutoController {
 			}
 			
 			Connection connection = ConnectionDB.getConnection();
-			PreparedStatement prepare = connection.prepareStatement("SELECT * FROM produto");
+			PreparedStatement prepare = connection.prepareStatement("SELECT * FROM img_produto");
 			
 			ResultSet resultSet = prepare.executeQuery();
 			
 			while(resultSet.next()) {
+				Img img = new Img();
+				
 				Produto produto = new Produto();
 				
-				produto.setId(resultSet.getInt("id"));
-				produto.setTitulo(resultSet.getString("titulo"));
-				produto.setDescricao(resultSet.getString("descricao"));
-				produto.setEstoque(resultSet.getString("estoque"));
-				produto.setUsuarios(ProdutoService.carregaListaDeUsuariosQueTemProdutoPorId(connection, produto.getId())); // CARREGA A LISTA DE USUARIO QUE TEM O PRODUTO
-				produto.setImgs(ProdutoService.carregaListaDeImagensProdutoPorId(connection, produto.getId())); // CARREGA A LISTA DE IMAGENS DO PRODUTO
+				produto.setId(resultSet.getInt("id_produto"));
 				
-				listaProdutos.add(produto);
+				img.setId(resultSet.getInt("id"));
+				img.setImg_1(resultSet.getString("img_1"));
+				img.setImg_2(resultSet.getString("img_2"));
+				img.setImg_3(resultSet.getString("img_3"));
+				img.setImg_4(resultSet.getString("img_4"));
+				img.setImg_5(resultSet.getString("img_5"));
+				
+				img.setProduto(produto); // RECEBE UM OBJETO DE PRODUTO
+				
+				listaImgs.add(img);
 				
 			}
 			
@@ -63,16 +69,16 @@ public class ProdutoController {
 		
 		}
 		
-		return listaProdutos;
+		return listaImgs;
 	}
 	
 	/* GET BY ID - TRAZ UM DADO DE ACORDO COM O ID PASSADO */
 	@GET
     @Path("/{id}/token/{token}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Produto getByProdutosId(@PathParam("id") int id, @PathParam("token") String token) {
+    public Img getByImgId(@PathParam("id") int id, @PathParam("token") String token) {
 		
-		Produto produto = null;
+		Img img = null;
 		
 		try {
 			
@@ -81,21 +87,27 @@ public class ProdutoController {
 			}
 			
 			Connection connection = ConnectionDB.getConnection();
-			PreparedStatement prepare = connection.prepareStatement("SELECT * FROM produto WHERE id = ?");
+			PreparedStatement prepare = connection.prepareStatement("SELECT * FROM img_produto WHERE id = ?");
 			prepare.setInt(1, id);
 			
 			ResultSet resultSet = prepare.executeQuery();
 			
 			while(resultSet.next()) {
 				
-				produto = new Produto();
+				img = new Img();
 				
-				produto.setId(resultSet.getInt("id"));
-				produto.setTitulo(resultSet.getString("titulo"));
-				produto.setDescricao(resultSet.getString("descricao"));
-				produto.setEstoque(resultSet.getString("estoque"));
-				produto.setUsuarios(ProdutoService.carregaListaDeUsuariosQueTemProdutoPorId(connection, produto.getId())); // CARREGA A LISTA DE USUARIO QUE TEM O PRODUTO
-				produto.setImgs(ProdutoService.carregaListaDeImagensProdutoPorId(connection, produto.getId())); // CARREGA A LISTA DE IMAGENS DO PRODUTO
+				Produto produto = new Produto();
+				
+				produto.setId(resultSet.getInt("id_produto"));
+				
+				img.setId(resultSet.getInt("id"));
+				img.setImg_1(resultSet.getString("img_1"));
+				img.setImg_2(resultSet.getString("img_2"));
+				img.setImg_3(resultSet.getString("img_3"));
+				img.setImg_4(resultSet.getString("img_4"));
+				img.setImg_5(resultSet.getString("img_5"));
+
+				img.setProduto(produto); // RECEBE UM OBJETO DE PRODUTO
 				
 			}
 			
@@ -104,7 +116,7 @@ public class ProdutoController {
 			
 		}
 		
-		return produto;
+		return img;
 	}
 	
 	/* POST - CADASTRA UM NOVO DADO NA BASE DE DADOS */
@@ -112,7 +124,7 @@ public class ProdutoController {
 	@Path("/token/{token}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-	public static Response postProdutos(Produto produto, @PathParam("token") String token) {
+	public static Response postImg(Img img, @PathParam("token") String token) {
 		
 		try {
 			
@@ -120,15 +132,16 @@ public class ProdutoController {
 				return null;
 			}
 			
-			if(ProdutoService.verificaSeExisteProdutoNoBanco(produto) == null) {
-				return null;
-			}
-			
 			Connection connection = ConnectionDB.getConnection();
-			PreparedStatement prepare = connection.prepareStatement("INSERT INTO produto (titulo, descricao, estoque) VALUES (?, ?, ?)");
-			prepare.setString(1, produto.getTitulo());
-			prepare.setString(2, produto.getDescricao());
-			prepare.setString(3, produto.getEstoque());
+			PreparedStatement prepare = connection.prepareStatement("INSERT INTO img_produto (img_1, img_2, img_3, img_4, img_5, id_produto) VALUES (?, ?, ?, ?, ?, ?)");
+			
+			prepare.setString(1, img.getImg_1());
+			prepare.setString(2, img.getImg_2());
+			prepare.setString(3, img.getImg_3());
+			prepare.setString(4, img.getImg_4());
+			prepare.setString(5, img.getImg_5());
+			
+			prepare.setInt(6, img.getProduto().getId()); // INSERE O ID DO OBJETO DE PRODUTO INSERIDO NO JSON
 			
 			prepare.executeUpdate();
 			
@@ -146,7 +159,7 @@ public class ProdutoController {
 	@Path("/token/{token}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-	public static Response putProdutos(Produto produto, @PathParam("token") String token) {
+	public static Response putImg(Img img, @PathParam("token") String token) {
 		
 		try {
 			
@@ -154,17 +167,21 @@ public class ProdutoController {
 				return null;
 			}
 			
-			if(produto.getId() == 0) {
+			if(img.getId() == 0) {
 				return null;
 			}
 			
 			Connection connection = ConnectionDB.getConnection();
-			PreparedStatement prepare = connection.prepareStatement("UPDATE produto SET titulo = ?, descricao = ?, estoque = ? WHERE id = ?");
-			prepare.setString(1, produto.getTitulo());
-			prepare.setString(2, produto.getDescricao());
-			prepare.setString(3, produto.getEstoque());
+			PreparedStatement prepare = connection.prepareStatement("UPDATE img_produto SET img_1 = ?, img_2 = ?, img_3 = ?, img_4 = ?, img_5 = ?, id_produto = ? WHERE id = ?");
+			prepare.setString(1, img.getImg_1());
+			prepare.setString(2, img.getImg_2());
+			prepare.setString(3, img.getImg_3());
+			prepare.setString(4, img.getImg_4());
+			prepare.setString(5, img.getImg_5());
 			
-			prepare.setInt(4, produto.getId());
+			prepare.setInt(6, img.getProduto().getId()); // INSERE O ID DO OBJETO DE PRODUTO INSERIDO NO JSON
+			
+			prepare.setInt(7, img.getId());
 			
 			prepare.executeUpdate();
 			
@@ -181,7 +198,7 @@ public class ProdutoController {
 	@DELETE
     @Path("/{id}/token/{token}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteProdutos(@PathParam("id") int id, @PathParam("token") String token) {
+    public Response deleteImg(@PathParam("id") int id, @PathParam("token") String token) {
         
         try {
         	
@@ -190,7 +207,7 @@ public class ProdutoController {
 			}
 			
 			Connection connection = ConnectionDB.getConnection();
-			PreparedStatement prepare = connection.prepareStatement("DELETE FROM produto WHERE id = ?");
+			PreparedStatement prepare = connection.prepareStatement("DELETE FROM img_produto WHERE id = ?");
 			prepare.setInt(1, id);
 			
 			prepare.executeUpdate();
