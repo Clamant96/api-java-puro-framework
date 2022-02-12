@@ -51,3 +51,34 @@
 }
 
 ##### DELETE PRODUTO: http://localhost:8080/produtos/{id_produto}/token/{token}
+
+### ENDPOINTS IMG:
+##### GET ALL IMG: http://localhost:8080/imgs/token/{token}
+##### GET BY ID IMG: http://localhost:8080/imgs/{id_img}/token/{token}
+
+##### POST CADASTRO IMG: http://localhost:8080/imgs/token/{token}
+##### Body: {
+    "img_1": "https://www.ifrr.edu.br/midia/teste/image",
+    "img_2": "https://23103.cdn.simplo7.net/static/23103/sku/Mecanica-produto-teste-nao-comprar--p-1533242083167.jpg",
+    "img_3": "https://st.depositphotos.com/1032577/3238/i/600/depositphotos_32382611-stock-photo-test.jpg",
+    "img_4": "https://static3.tcdn.com.br/img/img_prod/460977/teste_100485_1_cbc226c7d23a19c784fb4752ffe61337.png",
+    "img_5": "https://rockcontent.com/br/wp-content/uploads/sites/2/2020/02/teste-de-lideran%C3%A7a.png",
+    "produto": {
+        "id": 1
+    }
+}
+
+##### PUT ATUALIZA IMG: http://localhost:8080/imgs/token/{token}
+##### Body: {
+    "id": 1,
+    "img_1": "https://www.ifrr.edu.br/midia/teste/image",
+    "img_2": "https://rockcontent.com/br/wp-content/uploads/sites/2/2020/02/teste-de-lideran%C3%A7a.png",
+    "img_3": "",
+    "img_4": "",
+    "img_5": "",
+    "produto": {
+        "id": 1
+    }
+}
+
+##### DELETE IMG: http://localhost:8080/imgs/{id_img}/token/{token}
