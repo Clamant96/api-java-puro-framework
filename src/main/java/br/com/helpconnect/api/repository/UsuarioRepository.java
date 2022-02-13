@@ -1,38 +1,29 @@
-package br.com.helpconnect.api.controller;
+package br.com.helpconnect.api.repository;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
+import br.com.helpconnect.api.DB.ConnectionDB;
+import br.com.helpconnect.api.model.Produto;
 import br.com.helpconnect.api.model.Usuario;
 import br.com.helpconnect.api.model.UsuarioLogin;
-import br.com.helpconnect.api.repository.UsuarioRepository;
+import br.com.helpconnect.api.service.ProdutoService;
 import br.com.helpconnect.api.service.UsuarioService;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
-@Path("/usuarios")
-public class UsuarioController {
+public class UsuarioRepository {
 
 	/* GET ALL - TRAZ TODOS OS DADOS CADASTRADOS NA BASE DE DADOS */
-	@GET
-	@Path("/token/{token}")
-    @Produces(MediaType.APPLICATION_JSON)
-	public static List<Usuario> getAllUsuarios(@PathParam("token") String token) {
+	public static List<Usuario> findAllUsuarios() {
 		
-		/*List<Usuario> listaUsuarios = new ArrayList<Usuario>();
+		List<Usuario> listaUsuarios = new ArrayList<Usuario>();
 		
 		try {
-			
-			if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-				return null;
-			}
 			
 			Connection connection = ConnectionDB.getConnection();
 			PreparedStatement prepare = connection.prepareStatement("SELECT * FROM usuario");
@@ -45,7 +36,7 @@ public class UsuarioController {
 				
 				List<Produto> listaProdutos = new ArrayList<Produto>(); // INSTANCIA UMA LISTA DE PRODUTOS, PARA INSERIR ESSE PRODUTOS NO ARRAY DE PRODUTO DO USUARIO
 				
-				// RETORNA UM OBJETO PRODUTO
+				/* RETORNA UM OBJETO PRODUTO */
 				PreparedStatement prepareTableAssociativa = connection.prepareStatement("SELECT p.id, p.titulo, p.descricao, p.estoque FROM usuario AS u INNER JOIN usuario_produto AS up INNER JOIN produto AS p ON u.id = up.id_usuario AND up.id_produto = p.id WHERE u.id = ?");
 				prepareTableAssociativa.setInt(1, resultSet.getInt("id"));
 				
@@ -78,28 +69,15 @@ public class UsuarioController {
 		
 		}
 		
-		return listaUsuarios;*/
-		
-		if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-			return null;
-		}
-		
-		return UsuarioRepository.findAllUsuarios();
+		return listaUsuarios;
 	}
 	
 	/* GET BY ID - TRAZ UM DADO DE ACORDO COM O ID PASSADO */
-	@GET
-    @Path("/{id}/token/{token}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Usuario getByUsuarioId(@PathParam("id") int id, @PathParam("token") String token) {
+	public static Usuario findByUsuarioId(int id) {
 		
-		/*Usuario usuario = null;
+		Usuario usuario = null;
 		
 		try {
-			
-			if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-				return null;
-			}
 			
 			Connection connection = ConnectionDB.getConnection();
 			PreparedStatement prepare = connection.prepareStatement("SELECT * FROM usuario WHERE id = ?");
@@ -111,7 +89,7 @@ public class UsuarioController {
 				
 				List<Produto> listaProdutos = new ArrayList<Produto>(); // INSTANCIA UMA LISTA DE PRODUTOS, PARA INSERIR ESSE PRODUTOS NO ARRAY DE PRODUTO DO USUARIO
 				
-				// RETORNA UM OBJETO PRODUTO
+				/* RETORNA UM OBJETO PRODUTO */
 				PreparedStatement prepareTableAssociativa = connection.prepareStatement("SELECT p.id, p.titulo, p.descricao, p.estoque FROM usuario AS u INNER JOIN usuario_produto AS up INNER JOIN produto AS p ON u.id = up.id_usuario AND up.id_produto = p.id WHERE u.id = ?");
 				prepareTableAssociativa.setInt(1, resultSet.getInt("id"));
 				
@@ -144,33 +122,20 @@ public class UsuarioController {
 			
 		}
 		
-		return usuario;*/
-		
-		if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-			return null;
-		}
-		
-		return UsuarioRepository.findByUsuarioId(id);
+		return usuario;
 	}
 	
-	/* GET COMPRAR - ADICIONA UM PRODUTO AO USUARIO */
-	@GET
-    @Path("/comprar/id_produto/{idProduto}/id_usuario/{idUsuario}/token/{token}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public static Response comprarProduto(@PathParam("idUsuario") int idUsuario, @PathParam("idProduto") int idProduto, @PathParam("token") String token) {
+	/* GET COMPRAR - ADICIONA UM PRODUTO AO USUARIO  POR MEIO DO ID EM UMA TABELA ASSOCIATIVA */
+	public static Response comprarProduto(int idUsuario, int idProduto) {
 		
-		/*boolean disponibilidade = false;
+		boolean disponibilidade = false;
 		
 		try {
-			
-			if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-				return null;
-			}
 			
 			Connection connection = ConnectionDB.getConnection();
 			PreparedStatement prepare = null;
 			
-			// VERIFICA SE EXISTE ITENS DISPONIVEIS NO ESTOQUE DO PRODUTO SELECIONADO 
+			/* VERIFICA SE EXISTE ITENS DISPONIVEIS NO ESTOQUE DO PRODUTO SELECIONADO */
 			prepare = connection.prepareStatement("SELECT * FROM produto WHERE id = ?");
 			prepare.setInt(1, idProduto);
 			
@@ -194,7 +159,7 @@ public class UsuarioController {
 				
 			}
 			
-			// VERIFICA SE O ITEM JA ESTA INCLUSO NA LISTA DO USUARIO CASO ESTEJA O MESMO E REMOVIDO DA LISTA
+			/* VERIFICA SE O ITEM JA ESTA INCLUSO NA LISTA DO USUARIO CASO ESTEJA O MESMO E REMOVIDO DA LISTA */
 			try {
 				
 				prepare = connection.prepareStatement("SELECT * FROM usuario_produto WHERE id_usuario = ? AND id_produto = ?");
@@ -227,9 +192,9 @@ public class UsuarioController {
 				
 			}
 					
-			// INSERE UM NOVO NA TABELA ASSOCIATIVA, MAS PARA ISSO O DADO NAO PODE EXISTIR NESSA TABELA 
+			/* INSERE UM NOVO NA TABELA ASSOCIATIVA, MAS PARA ISSO O DADO NAO PODE EXISTIR NESSA TABELA */
 			if(disponibilidade) {
-				// AJUSTA O VALOR DO ESTOQUE RETIRANDO UMA UNIDADE DO ESTOQUE 
+				/* AJUSTA O VALOR DO ESTOQUE RETIRANDO UMA UNIDADE DO ESTOQUE */
 				ProdutoService.ajustaEstoqueRetiraProdutoDoEstoque(produto, connection, prepare);
 				
 				prepare = connection.prepareStatement("INSERT INTO usuario_produto (id_usuario, id_produto) VALUES (?, ?)");
@@ -247,23 +212,14 @@ public class UsuarioController {
 		}catch(Exception erro) {
 			return Response.notModified().build();
 			
-		}*/
-		
-		if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-			return null;
 		}
-		
-		return UsuarioRepository.comprarProduto(idUsuario, idProduto);
+
 	}
 	
 	/* POST - CADASTRA UM NOVO DADO NA BASE DE DADOS */
-	@POST
-	@Path("/cadastro")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-	public static Response postUsuario(Usuario usuario) {
+	public static Response cadastroUsuario(Usuario usuario) {
 		
-		/*try {
+		try {
 			
 			if(UsuarioService.verificaSeExisteUsuarioNoBanco(usuario) == null) {
 				return null;
@@ -281,19 +237,14 @@ public class UsuarioController {
 		}catch(Exception erro) {
 			return Response.notModified().build();
 			
-		}*/
+		}
 		
-		return UsuarioRepository.cadastroUsuario(usuario);
 	}
 	
 	/* POST - LOGA UM NOVO USUARIO NO SISTEMA, GERANDO UM TOKEN DE AUTENTICACAO */
-	@POST
-	@Path("/login")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-	public static UsuarioLogin postLoginUsuario(UsuarioLogin usuarioLogin) {
+	public static UsuarioLogin loginUsuario(UsuarioLogin usuarioLogin) {
 		
-		/*try {
+		try {
 			
 			Connection connection = ConnectionDB.getConnection();
 			PreparedStatement prepare = connection.prepareStatement("SELECT * FROM usuario WHERE username = ? AND senha = ?");
@@ -314,7 +265,7 @@ public class UsuarioController {
 				
 			}
 			
-			// CASO NAO TENHA SIDO LOCALIZADO O LOGIN NA BASE DE DADOS, RETORNA UM ERRO AO USUARIO 
+			/* CASO NAO TENHA SIDO LOCALIZADO O LOGIN NA BASE DE DADOS, RETORNA UM ERRO AO USUARIO */
 			if(usuarioLogin.getId() == 0) {
 				return null;
 			}
@@ -324,23 +275,13 @@ public class UsuarioController {
 			
 		}
 		
-		return usuarioLogin;*/
-		
-		return UsuarioRepository.loginUsuario(usuarioLogin);
+		return usuarioLogin;
 	}
 	
 	/* PUT - ATUALIZA UM DADO NA BASE DE DADOS, PARA ISSO USANDO COMO REFERENCIA O ID ENVIADO NO BODY */
-	@PUT
-	@Path("/atualizar/token/{token}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-	public static Response putUsuario(Usuario usuario, @PathParam("token") String token) {
+	public static Response putUsuario(Usuario usuario) {
 		
-		/*try {
-		  
-		 	if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-				return null;
-			}
+		try {
 			
 			if(usuario.getId() == 0) {
 				return null;
@@ -360,26 +301,14 @@ public class UsuarioController {
 		}catch(Exception erro) {
 			return Response.notModified().build();
 			
-		}*/
-		
-		if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-			return null;
 		}
 		
-		return UsuarioRepository.putUsuario(usuario);
 	}
 	
 	/* DELETE - DELETA UM DETERMINADO DADO DE ACORDO COMO O ID INFORMADO */
-	@DELETE
-    @Path("/{id}/token/{token}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response deletePessoa(@PathParam("id") int id, @PathParam("token") String token) {
+	public static Response deleteUsuario(int id) {
         
-        /*try {
-        	
-        	if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-				return null;
-			}
+        try {
 			
 			Connection connection = ConnectionDB.getConnection();
 			PreparedStatement prepare = connection.prepareStatement("DELETE FROM usuario WHERE id = ?");
@@ -392,13 +321,8 @@ public class UsuarioController {
 		}catch(Exception erro) {
 			return Response.notModified().build();
 			
-		}*/
-        
-		if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-			return null;
 		}
-		
-		return UsuarioRepository.deleteUsuario(id);
+        
     }
 	
 }

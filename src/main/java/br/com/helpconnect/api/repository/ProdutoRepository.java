@@ -1,37 +1,25 @@
-package br.com.helpconnect.api.controller;
+package br.com.helpconnect.api.repository;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.List;
 
+import br.com.helpconnect.api.DB.ConnectionDB;
 import br.com.helpconnect.api.model.Produto;
-import br.com.helpconnect.api.repository.ProdutoRepository;
-import br.com.helpconnect.api.service.UsuarioService;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
+import br.com.helpconnect.api.service.ProdutoService;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
-@Path("/produtos")
-public class ProdutoController {
+public class ProdutoRepository {
 	
 	/* GET ALL - TRAZ TODOS OS DADOS CADASTRADOS NA BASE DE DADOS */
-	@GET
-	@Path("/token/{token}")
-    @Produces(MediaType.APPLICATION_JSON)
-	public static List<Produto> getAllProdutos(@PathParam("token") String token) {
+	public static List<Produto> findAllProdutos() {
 		
-		/*List<Produto> listaProdutos = new ArrayList<Produto>();
+		List<Produto> listaProdutos = new ArrayList<Produto>();
 		
 		try {
-			
-			if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-				return null;
-			}
 			
 			Connection connection = ConnectionDB.getConnection();
 			PreparedStatement prepare = connection.prepareStatement("SELECT * FROM produto");
@@ -57,28 +45,15 @@ public class ProdutoController {
 		
 		}
 		
-		return listaProdutos;*/
-		
-		if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-			return null;
-		}
-		
-		return ProdutoRepository.findAllProdutos();
+		return listaProdutos;
 	}
 	
 	/* GET BY ID - TRAZ UM DADO DE ACORDO COM O ID PASSADO */
-	@GET
-    @Path("/{id}/token/{token}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Produto getByProdutosId(@PathParam("id") int id, @PathParam("token") String token) {
+	public static Produto findByProdutosId(int id) {
 		
-		/*Produto produto = null;
+		Produto produto = null;
 		
 		try {
-			
-			if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-				return null;
-			}
 			
 			Connection connection = ConnectionDB.getConnection();
 			PreparedStatement prepare = connection.prepareStatement("SELECT * FROM produto WHERE id = ?");
@@ -104,27 +79,13 @@ public class ProdutoController {
 			
 		}
 		
-		return produto;*/
-		
-		if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-			return null;
-		}
-		
-		return ProdutoRepository.findByProdutosId(id);
+		return produto;
 	}
 	
 	/* POST - CADASTRA UM NOVO DADO NA BASE DE DADOS */
-	@POST
-	@Path("/token/{token}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-	public static Response postProdutos(Produto produto, @PathParam("token") String token) {
+	public static Response postProdutos(Produto produto) {
 		
-		/*try {
-			
-			if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-				return null;
-			}
+		try {
 			
 			if(ProdutoService.verificaSeExisteProdutoNoBanco(produto) == null) {
 				return null;
@@ -143,27 +104,14 @@ public class ProdutoController {
 		}catch(Exception erro) {
 			return Response.notModified().build();
 			
-		}*/
-		
-		if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-			return null;
 		}
 		
-		return ProdutoRepository.postProdutos(produto);	
 	}
 	
 	/* PUT - ATUALIZA UM DADO NA BASE DE DADOS, PARA ISSO USANDO COMO REFERENCIA O ID ENVIADO NO BODY */
-	@PUT
-	@Path("/token/{token}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-	public static Response putProdutos(Produto produto, @PathParam("token") String token) {
+	public static Response putProdutos(Produto produto) {
 		
-		/*try {
-			
-			if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-				return null;
-			}
+		try {
 			
 			if(produto.getId() == 0) {
 				return null;
@@ -184,26 +132,14 @@ public class ProdutoController {
 		}catch(Exception erro) {
 			return Response.notModified().build();
 			
-		}*/
-		
-		if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-			return null;
 		}
 		
-		return ProdutoRepository.putProdutos(produto);
 	}
 	
 	/* DELETE - DELETA UM DETERMINADO DADO DE ACORDO COMO O ID INFORMADO */
-	@DELETE
-    @Path("/{id}/token/{token}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteProdutos(@PathParam("id") int id, @PathParam("token") String token) {
+	public static Response deleteProdutos(int id) {
         
-        /*try {
-        	
-        	if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-				return null;
-			}
+        try {
 			
 			Connection connection = ConnectionDB.getConnection();
 			PreparedStatement prepare = connection.prepareStatement("DELETE FROM produto WHERE id = ?");
@@ -216,13 +152,8 @@ public class ProdutoController {
 		}catch(Exception erro) {
 			return Response.notModified().build();
 			
-		}*/
-		
-		if(UsuarioService.autorizaAcessoEndpoint(token) == null) {
-			return null;
 		}
-		
-		return ProdutoRepository.deleteProdutos(id); 
+        
     }
 	
 }
