@@ -5,6 +5,7 @@
 [X] - https://www.youtube.com/watch?v=HV16Z6dWOCk&list=PLXbKgo5jPQE8ZvE1AGB_2guuBhRa3VPOh <br />
 [X] - https://www.youtube.com/watch?v=KXTOVbj2NEE&list=PLi75dzoFwEbrKsOZsp_bVS4_dHl2sZBva <br />
 [X] - https://www.theserverside.com/blog/Coffee-Talk-Java-News-Stories-and-Opinions/Java-File-Upload-Servlet-Ajax-Example (FILE UPLOAD EXEMPLO)
+[X] - https://www.treinaweb.com.br/blog/implementando-autenticacao-baseada-em-jwt-em-uma-api-restful-jax-rs (AUTENTICAÇÃO AUTH)
 
 ## ENDPOINTS CRIADOS ATE O MOMENTO
 
