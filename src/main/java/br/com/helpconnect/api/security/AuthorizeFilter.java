@@ -57,7 +57,7 @@ public class AuthorizeFilter implements ContainerRequestFilter {
             
         	String token = authorizationHeader;
         	
-        	AuthorizeFilter.setTokenArmazenado(token); // ARMAZENA O TOKEN ENVIADO PELO USUARIO
+        	tokenArmazenado = token; // ARMAZENA O TOKEN ENVIADO PELO USUARIO
             
         } catch (Exception erro) {
         	AuthorizeFilter.setTokenArmazenado(null);
@@ -72,7 +72,7 @@ public class AuthorizeFilter implements ContainerRequestFilter {
 	public static Usuario validaToken() throws IOException {
 		
 		/* CASO NAO TENHA SIDO PASSADO O TOKEN COMO PARAMETRO NO HEADER */
-		if(AuthorizeFilter.getTokenArmazenado() == null) {
+		if(AuthorizeFilter.getTokenArmazenado() == null || AuthorizeFilter.getTokenArmazenado() == "") {
 			return null;
 		}
     	
