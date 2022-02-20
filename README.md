@@ -31,7 +31,8 @@
 ##### POST CADASTRO USUARIO: http://localhost:8080/usuarios/cadastro
 ##### Body: {
     "username": "Ola teste 3",
-    "senha": "123456"
+    "senha": "123456",
+    "email": "teste@gmail.com"
 }
 ##### headers {
 	"key": "Authorization",
@@ -52,7 +53,8 @@
 ##### Body: {
     "id": 1,
     "username": "Ola teste 3 atualizado",
-    "senha": "654321"
+    "senha": "654321",
+    "email": "teste@gmail.com"
 }
 ##### headers {
 	"key": "Authorization",

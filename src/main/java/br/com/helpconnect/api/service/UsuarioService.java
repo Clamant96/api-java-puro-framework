@@ -37,6 +37,7 @@ public class UsuarioService {
 				usuario.setId(resultSet.getInt("id"));
 				usuario.setUsername(resultSet.getString("username"));
 				usuario.setSenha(resultSet.getString("senha"));
+				usuario.setEmail(resultSet.getString("email"));
 				
 			}
 			
@@ -69,6 +70,7 @@ public class UsuarioService {
 				usuario.setId(resultSet.getInt("id"));
 				usuario.setUsername(resultSet.getString("username"));
 				usuario.setSenha(resultSet.getString("senha"));
+				usuario.setEmail(resultSet.getString("email"));
 				
 			}
 			

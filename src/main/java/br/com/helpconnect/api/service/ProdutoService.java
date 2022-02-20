@@ -75,7 +75,7 @@ public class ProdutoService {
 		List<Usuario> listaUsuarios = new ArrayList<Usuario>();
 		
 		/* RETORNA UM OBJETO USUARIO */
-		PreparedStatement prepareTableAssociativa = connection.prepareStatement("SELECT u.id, u.username, u.senha FROM usuario AS u INNER JOIN usuario_produto AS up INNER JOIN produto AS p ON u.id = up.id_usuario AND up.id_produto = p.id WHERE p.id = ?");
+		PreparedStatement prepareTableAssociativa = connection.prepareStatement("SELECT u.id, u.username, u.senha, u.email FROM usuario AS u INNER JOIN usuario_produto AS up INNER JOIN produto AS p ON u.id = up.id_usuario AND up.id_produto = p.id WHERE p.id = ?");
 		prepareTableAssociativa.setInt(1, idProduto);
 		
 		ResultSet resultSetTableAssociativa = prepareTableAssociativa.executeQuery();
@@ -87,6 +87,7 @@ public class ProdutoService {
 			usuario.setId(resultSetTableAssociativa.getInt("id"));
 			usuario.setUsername(resultSetTableAssociativa.getString("username"));
 			usuario.setSenha(resultSetTableAssociativa.getString("senha"));
+			usuario.setEmail(resultSetTableAssociativa.getString("email"));
 			
 			listaUsuarios.add(usuario);
 			

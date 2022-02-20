@@ -58,6 +58,7 @@ public class UsuarioRepository {
 				usuario.setId(resultSet.getInt("id"));
 				usuario.setUsername(resultSet.getString("username"));
 				usuario.setSenha(resultSet.getString("senha"));
+				usuario.setEmail(resultSet.getString("email"));
 				usuario.setProdutos(UsuarioService.carregaListaDeProdutoPorIdDeUsuario(connection, usuario.getId())); // INSERE A LISTA DE PRODUTOS RECUPERADOS DO BANCO NO ARRAY DO USUARIO
 				
 				listaUsuarios.add(usuario);
@@ -113,6 +114,7 @@ public class UsuarioRepository {
 				usuario.setId(resultSet.getInt("id"));
 				usuario.setUsername(resultSet.getString("username"));
 				usuario.setSenha(resultSet.getString("senha"));
+				usuario.setEmail(resultSet.getString("email"));
 				usuario.setProdutos(UsuarioService.carregaListaDeProdutoPorIdDeUsuario(connection, usuario.getId())); // INSERE A LISTA DE PRODUTOS RECUPERADOS DO BANCO NO ARRAY DO USUARIO
 				
 			}
@@ -226,9 +228,10 @@ public class UsuarioRepository {
 			}
 			
 			Connection connection = ConnectionDB.getConnection();
-			PreparedStatement prepare = connection.prepareStatement("INSERT INTO usuario (username, senha) VALUES (?, ?)");
+			PreparedStatement prepare = connection.prepareStatement("INSERT INTO usuario (username, senha, email) VALUES (?, ?, ?)");
 			prepare.setString(1, usuario.getUsername());
 			prepare.setString(2, usuario.getSenha());
+			prepare.setString(3, usuario.getEmail());
 			
 			prepare.executeUpdate();
 			
@@ -258,6 +261,7 @@ public class UsuarioRepository {
 				usuarioLogin.setId(resultSet.getInt("id"));
 				usuarioLogin.setUsername(resultSet.getString("username"));
 				usuarioLogin.setSenha(resultSet.getString("senha"));
+				usuarioLogin.setEmail(resultSet.getString("email"));
 				
 				String token = usuarioLogin.getUsername() +":"+ usuarioLogin.getSenha();
 				
@@ -288,11 +292,12 @@ public class UsuarioRepository {
 			}
 			
 			Connection connection = ConnectionDB.getConnection();
-			PreparedStatement prepare = connection.prepareStatement("UPDATE usuario SET username = ?, senha = ? WHERE id = ?");
+			PreparedStatement prepare = connection.prepareStatement("UPDATE usuario SET username = ?, senha = ?, email = ? WHERE id = ?");
 			prepare.setString(1, usuario.getUsername());
 			prepare.setString(2, usuario.getSenha());
+			prepare.setString(3, usuario.getEmail());
 			
-			prepare.setInt(3, usuario.getId());
+			prepare.setInt(4, usuario.getId());
 			
 			prepare.executeUpdate();
 			

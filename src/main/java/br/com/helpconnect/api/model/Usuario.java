@@ -12,6 +12,8 @@ public class Usuario {
     private String senha;
     
     private List<Produto> produtos = new ArrayList<>();
+    
+    private String email;
 
 	public int getId() {
 		return id;
@@ -43,6 +45,14 @@ public class Usuario {
 
 	public void setProdutos(List<Produto> produtos) {
 		this.produtos = produtos;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
     
 }
