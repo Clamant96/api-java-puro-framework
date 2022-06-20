@@ -1,24 +1,15 @@
 package br.com.helpconnect.api.security;
 
 import java.io.IOException;
-//import java.nio.charset.StandardCharsets;
-//import java.security.Key;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Base64;
 
-//import javax.crypto.SecretKey;
-
 import br.com.helpconnect.api.DB.ConnectionDB;
 import br.com.helpconnect.api.anotations.Authorize;
 import br.com.helpconnect.api.model.Usuario;
-//import br.com.helpconnect.api.service.UsuarioService;
-//import io.jsonwebtoken.Jwts;
-//import io.jsonwebtoken.io.Decoders;
-//import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.Priority;
-//import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
