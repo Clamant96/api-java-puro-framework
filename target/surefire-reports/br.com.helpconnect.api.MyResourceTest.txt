@@ -1,8 +1,0 @@
--------------------------------------------------------------------------------
-Test set: br.com.helpconnect.api.MyResourceTest
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.997 sec <<< FAILURE! - in br.com.helpconnect.api.MyResourceTest
-testGetIt(br.com.helpconnect.api.MyResourceTest)  Time elapsed: 0.958 sec  <<< ERROR!
-jakarta.ws.rs.NotFoundException: HTTP 404 Not Found
-	at br.com.helpconnect.api.MyResourceTest.testGetIt(MyResourceTest.java:45)
-
